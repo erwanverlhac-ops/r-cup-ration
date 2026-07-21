@@ -233,6 +233,14 @@
                 <h2 class="text-xl font-bold text-white">Historique Récent</h2>
                 <button onclick="clearHistory()" class="text-xs text-garmin-danger hover:text-red-400 underline">Vider</button>
             </div>
+            
+            <!-- NOUVEAU : Statut d'Entraînement Global -->
+            <div id="global-status-panel" class="mb-4 bg-slate-800/80 p-4 rounded-xl border border-slate-600 flex flex-col justify-center items-center text-center">
+                <div class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Statut d'entraînement (7 Jours)</div>
+                <div id="global-status-title" class="text-lg font-bold text-garmin-accent">Productif</div>
+                <div id="global-status-desc" class="text-[11px] text-slate-300 mt-1">Charge optimale de progression.</div>
+            </div>
+
             <div id="history-list" class="space-y-3 max-h-64 overflow-y-auto pr-2">
                 <!-- Injected via JS -->
             </div>
@@ -286,6 +294,11 @@
                 <div class="flex justify-between border-b border-slate-700 pb-2">
                     <span class="text-slate-400">Stress Thermique :</span>
                     <span id="detail-temp" class="font-semibold text-white">-</span>
+                </div>
+                <!-- NOUVEAU : Effet d'Entraînement -->
+                <div class="flex justify-between border-b border-slate-700 pb-2">
+                    <span class="text-slate-400">Bénéfice de la séance :</span>
+                    <span id="detail-effect" class="font-bold text-sky-400">Endurance de base</span>
                 </div>
                 <div class="flex justify-between pb-1">
                     <span class="text-slate-400">Multiplicateur Sommeil :</span>
@@ -428,6 +441,7 @@
             let powerDesc = "Non renseignée";
             let stressScoreDesc = "";
             let tss = 0;
+            let trainingEffect = "Endurance de Base (Aérobie)"; // Nouveau : Badge d'effet d'entraînement
 
             // 1st Priority: User provided TSS & IF directly
             if (inputTSS > 0) {
@@ -449,11 +463,11 @@
                 // Analyze IF
                 let actualIF = inputIF > 0 ? inputIF : (np > 0 ? np/ftp : 0);
                 if (actualIF > 0) {
-                    if (actualIF < 0.75) powerDesc = `Endurance / Récupération (IF: ${actualIF.toFixed(2)})`;
-                    else if (actualIF < 0.85) powerDesc = `Tempo / Rythme (IF: ${actualIF.toFixed(2)})`;
-                    else if (actualIF < 0.95) powerDesc = `Sweet Spot / Seuil (IF: ${actualIF.toFixed(2)})`;
-                    else if (actualIF < 1.05) powerDesc = `Intense / Seuil Max (IF: ${actualIF.toFixed(2)})`;
-                    else powerDesc = `Très intense / Anaérobie (IF: ${actualIF.toFixed(2)})`;
+                    if (actualIF < 0.75) { powerDesc = `Endurance / Récupération (IF: ${actualIF.toFixed(2)})`; trainingEffect = actualIF < 0.65 ? "Récupération Active" : "Endurance de Base (Aérobie)"; }
+                    else if (actualIF < 0.85) { powerDesc = `Tempo / Rythme (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Tempo (Rythme soutenu)"; }
+                    else if (actualIF < 0.95) { powerDesc = `Sweet Spot / Seuil (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Amélioration du Seuil Lactique"; }
+                    else if (actualIF < 1.05) { powerDesc = `Intense / Seuil Max (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Développement VO2 Max / PMA"; }
+                    else { powerDesc = `Très intense / Anaérobie (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Capacité Anaérobie (Sprints/Lactique)"; }
                 } else {
                     powerDesc = `Basé sur le TSS fourni`;
                 }
@@ -487,22 +501,23 @@
                 const z4 = parseInt(document.getElementById('z4').value) || 210;
                 const z5 = parseInt(document.getElementById('z5').value) || 240;
 
-                if (np <= z1) { powerDesc = `Z1 (Récupération) - IF: ${intensityFactor.toFixed(2)}`; }
-                else if (np <= z2) { powerDesc = `Z2 (Endurance) - IF: ${intensityFactor.toFixed(2)}`; }
-                else if (np <= z3) { powerDesc = `Z3 (Tempo) - IF: ${intensityFactor.toFixed(2)}`; }
-                else if (np <= z4) { powerDesc = `Z4 (Seuil) - IF: ${intensityFactor.toFixed(2)}`; }
-                else if (np <= z5) { powerDesc = `Z5 (VO2 Max) - IF: ${intensityFactor.toFixed(2)}`; }
-                else { powerDesc = `Z6 (Anaérobie/Sprint) - IF: ${intensityFactor.toFixed(2)}`; }
+                if (np <= z1) { powerDesc = `Z1 (Récupération) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Récupération Active"; }
+                else if (np <= z2) { powerDesc = `Z2 (Endurance) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Endurance de Base (Aérobie)"; }
+                else if (np <= z3) { powerDesc = `Z3 (Tempo) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Tempo (Rythme soutenu)"; }
+                else if (np <= z4) { powerDesc = `Z4 (Seuil) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Amélioration du Seuil Lactique"; }
+                else if (np <= z5) { powerDesc = `Z5 (VO2 Max) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Développement VO2 Max / PMA"; }
+                else { powerDesc = `Z6 (Anaérobie/Sprint) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Capacité Anaérobie (Sprints/Lactique)"; }
             } 
             // Fallback: Heart Rate intensity calculation
             else {
                 const intensityRatio = hrAvg / hrMax;
                 let hrMultiplier = 5;
                 
-                if (intensityRatio >= 0.9) { hrMultiplier = 25; cardioDesc = "Extrême (VO2 Max/Max)"; }
-                else if (intensityRatio >= 0.85) { hrMultiplier = 20; cardioDesc = "Très Élevé (Seuil/Z4)"; }
-                else if (intensityRatio >= 0.75) { hrMultiplier = 14; cardioDesc = "Élevé (Tempo/Z3)"; }
-                else if (intensityRatio >= 0.65) { hrMultiplier = 8; cardioDesc = "Modéré (Endurance/Z2)"; }
+                if (intensityRatio >= 0.9) { hrMultiplier = 25; cardioDesc = "Extrême (VO2 Max/Max)"; trainingEffect = "Développement VO2 Max / PMA"; }
+                else if (intensityRatio >= 0.85) { hrMultiplier = 20; cardioDesc = "Très Élevé (Seuil/Z4)"; trainingEffect = "Amélioration du Seuil Lactique"; }
+                else if (intensityRatio >= 0.75) { hrMultiplier = 14; cardioDesc = "Élevé (Tempo/Z3)"; trainingEffect = "Tempo (Rythme soutenu)"; }
+                else if (intensityRatio >= 0.65) { hrMultiplier = 8; cardioDesc = "Modéré (Endurance/Z2)"; trainingEffect = "Endurance de Base (Aérobie)"; }
+                else { trainingEffect = "Récupération Active"; }
                 
                 rawRecovery = durationHrs * hrMultiplier;
                 tss = Math.round(rawRecovery * 5); 
@@ -550,7 +565,8 @@
                 stressScoreDesc: stressScoreDesc,
                 tss: tss,
                 ageDesc: ageDesc,
-                tempDesc: tempDesc
+                tempDesc: tempDesc,
+                trainingEffect: trainingEffect // Ajouté à l'objet retourné
             };
         }
 
@@ -614,6 +630,40 @@
                 return;
             }
 
+            // Calcul du Statut d'Entraînement Global (Surcharge / Productif / Maintien)
+            // On prend la date de l'activité la plus récente, et on somme les TSS des 7 jours précédents.
+            activityHistory.sort((a, b) => a.date - b.date); // S'assurer que c'est trié
+            const latestAct = activityHistory[activityHistory.length - 1];
+            const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+            
+            let weeklyTSS = 0;
+            activityHistory.forEach(act => {
+                if (latestAct.date.getTime() - act.date.getTime() <= oneWeekMs) {
+                    weeklyTSS += act.stats.tss;
+                }
+            });
+
+            // Affichage du statut global
+            let statusTitle = "";
+            let statusColor = "";
+            let statusDesc = "";
+
+            if (weeklyTSS < 150) {
+                statusTitle = "Désentraînement / Repos"; statusColor = "text-slate-400"; statusDesc = "Charge très faible. Ton corps récupère ou perd en condition.";
+            } else if (weeklyTSS < 300) {
+                statusTitle = "Maintien"; statusColor = "text-sky-400"; statusDesc = "Charge suffisante pour maintenir ta condition physique actuelle.";
+            } else if (weeklyTSS < 600) {
+                statusTitle = "Productif"; statusColor = "text-garmin-accent"; statusDesc = "Excellente zone ! Ton corps s'adapte et progresse efficacement.";
+            } else if (weeklyTSS < 800) {
+                statusTitle = "Surcharge Périodique"; statusColor = "text-garmin-alert"; statusDesc = "Gros volume d'entraînement. Assure-toi de bien dormir.";
+            } else {
+                statusTitle = "Surentraînement / Risque"; statusColor = "text-garmin-danger"; statusDesc = "Charge extrême (>800 TSS). Réduis l'intensité pour éviter la blessure.";
+            }
+
+            document.getElementById('global-status-title').innerText = statusTitle;
+            document.getElementById('global-status-title').className = `text-lg font-bold ${statusColor}`;
+            document.getElementById('global-status-desc').innerText = `Charge 7j : ~${weeklyTSS} TSS. ${statusDesc}`;
+
             panel.classList.remove('hidden');
             list.innerHTML = '';
 
@@ -633,8 +683,8 @@
                         <div>
                             <div class="text-sm font-semibold text-white">${dateStr}</div>
                             ${contextStr}
-                            <div class="text-[11px] text-slate-400">${act.stats.stressScoreDesc}</div>
-                            ${act.coeffReason ? `<div class="text-[10px] text-garmin-accent mt-0.5 italic">${act.coeffReason}</div>` : ''}
+                            <div class="text-[11px] text-slate-400 mb-0.5">${act.stats.stressScoreDesc} • <span class="text-sky-300">${act.stats.trainingEffect}</span></div>
+                            ${act.coeffReason ? `<div class="text-[10px] text-garmin-accent italic">${act.coeffReason}</div>` : ''}
                         </div>
                         <div class="text-right">
                             <div class="text-lg font-bold text-garmin-accent">${act.totalRecoveryApplied}h</div>
@@ -665,6 +715,7 @@
             document.getElementById('detail-sleep').innerText = stats.sleepDesc;
             document.getElementById('detail-age').innerText = stats.ageDesc;
             document.getElementById('detail-temp').innerText = stats.tempDesc;
+            document.getElementById('detail-effect').innerText = stats.trainingEffect; // Mise à jour de l'effet
             
             const residualEl = document.getElementById('detail-residual');
             if (activityData.residualFatigue > 0) {
