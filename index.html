@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculateur de Récupération Sportive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,12 +32,14 @@
             background-color: #0f172a;
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         .glass-panel {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        /* Hide arrows on number inputs */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -56,7 +58,7 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
         #result-container.show {
-            display: block;
+            display: flex;
             opacity: 1;
             transform: translateY(0);
         }
@@ -67,38 +69,38 @@
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex justify-center items-start">
+<body class="min-h-screen p-3 sm:p-4 md:p-8 flex justify-center items-start">
 
-    <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="max-w-4xl w-full flex flex-col lg:grid lg:grid-cols-2 gap-6">
         
-        <!-- Left Column : Inputs -->
-        <div class="glass-panel rounded-2xl p-6 shadow-2xl">
+        <!-- Left Column : Inputs (Order 1 on mobile) -->
+        <div class="glass-panel rounded-2xl p-5 sm:p-6 shadow-2xl order-1 lg:col-start-1 lg:row-start-1">
             <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
-                <svg class="w-8 h-8 text-garmin-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                <h1 class="text-2xl font-bold">Données de la Séance</h1>
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 text-garmin-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <h1 class="text-xl sm:text-2xl font-bold">Données de la Séance</h1>
             </div>
 
             <form id="calculator-form" class="space-y-6">
                 <!-- Date et Heure -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Date et Heure du début de la séance</label>
-                    <input type="datetime-local" id="activityDate" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Date et Heure du début</label>
+                    <input type="datetime-local" id="activityDate" onchange="savePreferences()" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
                 </div>
 
                 <!-- Distance & Dénivelé -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-400 mb-2">Distance</label>
                         <div class="relative">
-                            <input type="number" id="distance" step="0.1" min="0" placeholder="Ex: 85.5" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">km</span>
+                            <input type="number" id="distance" step="0.1" min="0" placeholder="Ex: 85" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm">km</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-2">Dénivelé Positif (D+)</label>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Dénivelé (D+)</label>
                         <div class="relative">
-                            <input type="number" id="elevation" step="1" min="0" placeholder="Ex: 1200" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">m</span>
+                            <input type="number" id="elevation" step="1" min="0" placeholder="Ex: 1200" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm">m</span>
                         </div>
                     </div>
                 </div>
@@ -106,155 +108,131 @@
                 <!-- Durée -->
                 <div>
                     <label class="block text-sm font-medium text-slate-400 mb-2">Durée de l'effort</label>
-                    <div class="flex gap-4">
+                    <div class="flex gap-3 sm:gap-4">
                         <div class="flex-1 relative">
-                            <input type="number" id="hours" value="2" min="0" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">h</span>
+                            <input type="number" id="hours" value="2" min="0" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm">h</span>
                         </div>
                         <div class="flex-1 relative">
-                            <input type="number" id="minutes" value="54" min="0" max="59" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">min</span>
+                            <input type="number" id="minutes" value="30" min="0" max="59" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm">min</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Fréquence Cardiaque -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-400 mb-2">FC Moyenne</label>
                         <div class="relative">
-                            <input type="number" id="hrAvg" value="154" min="40" max="220" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">bpm</span>
+                            <input type="number" id="hrAvg" value="145" min="40" max="220" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">bpm</span>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-400 mb-2">FC Max</label>
                         <div class="relative">
-                            <input type="number" id="hrMax" value="180" min="100" max="220" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">bpm</span>
+                            <input type="number" id="hrMax" value="180" min="100" max="220" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">bpm</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Métriques Avancées (Wahoo / Garmin) -->
+                <!-- Métriques Avancées -->
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-garmin-accent/30">
                     <h3 class="text-garmin-accent font-semibold mb-4 text-sm flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        Métriques Avancées (ELEMNT / Garmin)
+                        Métriques ELEMNT / Garmin
                     </h3>
                     
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
                         <div>
                             <label class="block text-xs font-medium text-slate-400 mb-1">TSS</label>
-                            <input type="number" id="inputTSS" step="1" placeholder="Ex: 150" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-garmin-accent text-sm">
+                            <input type="number" id="inputTSS" step="1" placeholder="Ex: 150" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">IF (Facteur)</label>
-                            <input type="number" id="inputIF" step="0.01" placeholder="Ex: 0.85" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-garmin-accent text-sm">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">IF</label>
+                            <input type="number" id="inputIF" step="0.01" placeholder="Ex: 0.85" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">VI (Variabilité)</label>
-                            <input type="number" id="inputVI" step="0.01" placeholder="Ex: 1.05" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-garmin-accent text-sm">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">VI</label>
+                            <input type="number" id="inputVI" step="0.01" placeholder="Ex: 1.05" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent">
                         </div>
                     </div>
                     
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <label class="block text-sm font-medium text-slate-400 mb-2">Ou Puissance Normalisée (NP)</label>
                         <div class="relative">
-                            <input type="number" id="normalizedPower" placeholder="Si pas de TSS/IF..." class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:border-garmin-accent text-sm">
-                            <span class="absolute right-4 top-2 text-slate-400 text-sm">W</span>
+                            <input type="number" id="normalizedPower" placeholder="Si pas de TSS/IF..." class="w-full bg-slate-900 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent">
+                            <span class="absolute right-4 top-3 text-slate-400 text-sm">W</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Profil & Environnement -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-2">Ton Âge</label>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Âge</label>
                         <div class="relative">
-                            <input type="number" id="age" value="35" min="15" max="99" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">ans</span>
+                            <input type="number" id="age" value="35" min="15" max="99" onchange="savePreferences()" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">ans</span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-2">Température Moy.</label>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Température</label>
                         <div class="relative">
-                            <input type="number" id="temperature" value="20" min="-10" max="50" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
-                            <span class="absolute right-4 top-2.5 text-slate-400">°C</span>
+                            <input type="number" id="temperature" value="20" min="-10" max="50" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">°C</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Sommeil -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Qualité du sommeil / Forme</label>
+                <div class="pt-2">
+                    <label class="block text-sm font-medium text-slate-400 mb-4">Qualité du sommeil (récupération initiale)</label>
                     <input type="range" id="sleep" min="1" max="5" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-garmin-accent">
-                    <div class="flex justify-between text-xs text-slate-400 mt-2 font-medium">
-                        <span>1 (Mauvais)</span>
+                    <div class="flex justify-between text-xs text-slate-400 mt-3 font-medium px-1">
+                        <span>1 (Ko)</span>
                         <span>2</span>
                         <span>3 (Moyen)</span>
                         <span>4</span>
-                        <span>5 (Excellent)</span>
+                        <span>5 (Top)</span>
                     </div>
                 </div>
 
-                <!-- Zones de Puissance (Collapsible) -->
-                <div class="border border-slate-700 rounded-lg overflow-hidden">
-                    <button type="button" onclick="toggleZones()" class="w-full bg-slate-800 px-4 py-3 text-left text-sm font-medium flex justify-between items-center hover:bg-slate-700 smooth-transition">
-                        <span>Configuration de la Puissance (FTP & Zones)</span>
+                <div class="border border-slate-700 rounded-lg overflow-hidden mt-4">
+                    <button type="button" onclick="toggleZones()" class="w-full bg-slate-800 px-4 py-3.5 text-left text-sm font-medium flex justify-between items-center hover:bg-slate-700 smooth-transition">
+                        <span>Configuration (FTP & Zones)</span>
                         <svg id="zones-icon" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <div id="zones-content" class="hidden p-4 bg-slate-900 grid grid-cols-2 gap-3 text-sm">
-                        <div class="col-span-2 mb-2"><label class="text-slate-400 font-bold text-xs">FTP (Functional Threshold Power)</label><input type="number" id="ftp" value="200" onchange="updateZonesFromFTP()" class="w-full mt-1 bg-slate-700 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Plafond Z1 (W)</label><input type="number" id="z1" value="110" class="w-full mt-1 bg-slate-800 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Plafond Z2 (W)</label><input type="number" id="z2" value="150" class="w-full mt-1 bg-slate-800 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Plafond Z3 (W)</label><input type="number" id="z3" value="180" class="w-full mt-1 bg-slate-800 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Plafond Z4 (W)</label><input type="number" id="z4" value="210" class="w-full mt-1 bg-slate-800 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Plafond Z5 (W)</label><input type="number" id="z5" value="240" class="w-full mt-1 bg-slate-800 border-none rounded p-2 text-white"></div>
-                        <div><label class="text-slate-400 text-xs">Z6 (Anaérobie)</label><div id="z6-label" class="w-full mt-1 bg-slate-800 p-2 text-white rounded opacity-50 cursor-not-allowed">> 240 W</div></div>
+                    <div id="zones-content" class="hidden p-4 bg-slate-900 grid grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div class="col-span-2 mb-2">
+                            <label class="text-slate-400 font-bold text-xs">FTP (Functional Threshold Power)</label>
+                            <input type="number" id="ftp" value="200" onchange="updateZonesFromFTP(); savePreferences()" class="w-full mt-1 bg-slate-700 border-none rounded p-2.5 text-base sm:text-sm text-white focus:ring-1 focus:ring-garmin-accent">
+                        </div>
+                        <div><label class="text-slate-400 text-xs">Plafond Z1 (W)</label><input type="number" id="z1" value="99" onchange="savePreferences()" class="w-full mt-1 bg-slate-800 border-none rounded p-2.5 text-base sm:text-sm text-white"></div>
+                        <div><label class="text-slate-400 text-xs">Plafond Z2 (W)</label><input type="number" id="z2" value="135" onchange="savePreferences()" class="w-full mt-1 bg-slate-800 border-none rounded p-2.5 text-base sm:text-sm text-white"></div>
+                        <div><label class="text-slate-400 text-xs">Plafond Z3 (W)</label><input type="number" id="z3" value="162" onchange="savePreferences()" class="w-full mt-1 bg-slate-800 border-none rounded p-2.5 text-base sm:text-sm text-white"></div>
+                        <div><label class="text-slate-400 text-xs">Plafond Z4 (W)</label><input type="number" id="z4" value="189" onchange="savePreferences()" class="w-full mt-1 bg-slate-800 border-none rounded p-2.5 text-base sm:text-sm text-white"></div>
+                        <div><label class="text-slate-400 text-xs">Plafond Z5 (W)</label><input type="number" id="z5" value="216" onchange="savePreferences()" class="w-full mt-1 bg-slate-800 border-none rounded p-2.5 text-base sm:text-sm text-white"></div>
+                        <div><label class="text-slate-400 text-xs">Z6 (Anaérobie)</label><div id="z6-label" class="w-full mt-1 bg-slate-800 p-2.5 text-base sm:text-sm text-white rounded opacity-50 cursor-not-allowed">> 216 W</div></div>
                     </div>
                 </div>
 
-                <!-- Error Message -->
-                <div id="error-msg" class="hidden text-garmin-danger text-sm text-center bg-red-900/20 py-2 rounded-lg">
+                <div id="error-msg" class="hidden text-garmin-danger text-sm text-center bg-red-900/20 py-3 rounded-lg">
                     Veuillez remplir correctement la durée et la fréquence cardiaque.
                 </div>
 
-                <!-- Submit Button -->
-                <button type="button" onclick="calculateAndSave()" class="w-full bg-garmin-accent hover:bg-emerald-400 text-slate-900 font-bold text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] smooth-transition transform hover:-translate-y-1">
-                    Calculer & Ajouter à l'historique
+                <button type="button" onclick="calculateAndSave()" class="w-full bg-garmin-accent hover:bg-emerald-400 text-slate-900 font-bold text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] smooth-transition transform hover:-translate-y-1 active:translate-y-0 active:shadow-none">
+                    Calculer & Sauvegarder
                 </button>
             </form>
         </div>
 
-        <!-- Section Historique -->
-        <div id="history-panel" class="hidden glass-panel rounded-2xl p-6 shadow-2xl mt-6 lg:col-span-1">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-                <h2 class="text-xl font-bold text-white">Historique Récent</h2>
-                <button onclick="clearHistory()" class="text-xs text-garmin-danger hover:text-red-400 underline">Vider</button>
-            </div>
-            
-            <!-- NOUVEAU : Statut d'Entraînement Global -->
-            <div id="global-status-panel" class="mb-4 bg-slate-800/80 p-4 rounded-xl border border-slate-600 flex flex-col justify-center items-center text-center">
-                <div class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Statut d'entraînement (7 Jours)</div>
-                <div id="global-status-title" class="text-lg font-bold text-garmin-accent">Productif</div>
-                <div id="global-status-desc" class="text-[11px] text-slate-300 mt-1">Charge optimale de progression.</div>
-            </div>
-
-            <div id="history-list" class="space-y-3 max-h-64 overflow-y-auto pr-2">
-                <!-- Injected via JS -->
-            </div>
-        </div>
-
-        <!-- Right Column : Results -->
-        <div id="result-container" class="glass-panel rounded-2xl p-6 shadow-2xl flex flex-col justify-center items-center relative overflow-hidden h-fit lg:sticky lg:top-8">
-            <!-- Background Decoration -->
+        <div id="result-container" class="glass-panel rounded-2xl p-5 sm:p-6 shadow-2xl flex-col justify-center items-center relative overflow-hidden h-fit order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-8">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-garmin-accent rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
             
-            <h2 class="text-xl font-medium text-slate-300 mb-8 w-full text-center">Temps de Récupération</h2>
+            <h2 class="text-xl font-medium text-slate-300 mb-6 w-full text-center">Temps de Récupération</h2>
             
-            <!-- Circular Progress -->
-            <div class="relative w-48 h-48 mb-6">
+            <div class="relative w-40 h-40 sm:w-48 sm:h-48 mb-6">
                 <svg class="w-full h-full" viewBox="0 0 100 100">
                     <circle class="text-slate-700 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
                     <circle id="recovery-ring" class="text-garmin-accent stroke-current progress-ring__circle" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
@@ -265,65 +243,76 @@
                 </div>
             </div>
 
-            <div id="result-status" class="px-4 py-1.5 rounded-full text-sm font-bold tracking-wide uppercase mb-8">
-                <!-- Status badge injected here -->
+            <div id="result-status" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase mb-6 text-center">
+                <!-- Status badge -->
             </div>
 
-            <!-- Details Analysis -->
-            <div class="w-full space-y-4 text-sm bg-slate-800/50 p-4 rounded-xl">
+            <div class="w-full space-y-3 sm:space-y-4 text-xs sm:text-sm bg-slate-800/50 p-4 rounded-xl">
                 <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Score de Stress (TSS / HR) :</span>
-                    <span id="detail-tss" class="font-semibold text-white">-</span>
+                    <span class="text-slate-400">Score (TSS / HR) :</span>
+                    <span id="detail-tss" class="font-semibold text-white text-right">-</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Fatigue Résiduelle (Historique) :</span>
-                    <span id="detail-residual" class="font-semibold text-garmin-alert">+0h</span>
+                    <span class="text-slate-400">Fatigue Résiduelle :</span>
+                    <span id="detail-residual" class="font-semibold text-garmin-alert text-right">+0h</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Impact Principal :</span>
-                    <span id="detail-cardio" class="font-semibold text-white">Élevé (Zone 3)</span>
+                    <span class="text-slate-400">Impact Cardio :</span>
+                    <span id="detail-cardio" class="font-semibold text-white text-right">-</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Zone de Puissance (NP) :</span>
-                    <span id="detail-power" class="font-semibold text-white">-</span>
+                    <span class="text-slate-400">Bénéfice :</span>
+                    <span id="detail-effect" class="font-bold text-sky-400 text-right">-</span>
                 </div>
                 <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Facteur Âge :</span>
-                    <span id="detail-age" class="font-semibold text-white">-</span>
-                </div>
-                <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Stress Thermique :</span>
-                    <span id="detail-temp" class="font-semibold text-white">-</span>
-                </div>
-                <!-- NOUVEAU : Effet d'Entraînement -->
-                <div class="flex justify-between border-b border-slate-700 pb-2">
-                    <span class="text-slate-400">Bénéfice de la séance :</span>
-                    <span id="detail-effect" class="font-bold text-sky-400">Endurance de base</span>
+                    <span class="text-slate-400">Facteurs Physio :</span>
+                    <span id="detail-physio" class="font-semibold text-white text-right">-</span>
                 </div>
                 <div class="flex justify-between pb-1">
-                    <span class="text-slate-400">Multiplicateur Sommeil :</span>
-                    <span id="detail-sleep" class="font-semibold text-white">-25% (Excellent)</span>
+                    <span class="text-slate-400">Sommeil :</span>
+                    <span id="detail-sleep" class="font-semibold text-white text-right">-</span>
                 </div>
             </div>
 
-            <!-- Recommendation -->
             <div class="mt-6 w-full text-center">
-                <p id="recommendation-text" class="text-slate-300 text-sm leading-relaxed italic">
-                    <!-- Text injected via JS -->
+                <p id="recommendation-text" class="text-slate-300 text-xs sm:text-sm leading-relaxed italic">
+                    Remplissez les informations pour obtenir une recommandation.
                 </p>
+            </div>
+        </div>
+
+        <div id="history-panel" class="hidden glass-panel rounded-2xl p-5 sm:p-6 shadow-2xl order-3 lg:col-start-1 lg:row-start-2">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                <h2 class="text-xl font-bold text-white">Historique Récent</h2>
+                <button id="clear-btn" onclick="clearHistory()" class="text-xs sm:text-sm text-garmin-danger hover:text-red-400 underline p-2 -mr-2 smooth-transition">Vider le cache</button>
+            </div>
+            
+            <div id="global-status-panel" class="mb-4 bg-slate-800/80 p-4 rounded-xl border border-slate-600 flex flex-col justify-center items-center text-center">
+                <div class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Statut d'entraînement (7 Jours)</div>
+                <div id="global-status-title" class="text-base sm:text-lg font-bold text-garmin-accent">Productif</div>
+                <div id="global-status-desc" class="text-[10px] sm:text-[11px] text-slate-300 mt-1">Charge optimale de progression.</div>
+            </div>
+
+            <div id="history-list" class="space-y-3 max-h-72 overflow-y-auto pr-1 sm:pr-2">
+                <!-- Injected via JS -->
             </div>
         </div>
     </div>
 
     <script>
-        // State for History
         let activityHistory = [];
 
-        // Set default date to now
+        // Load data on start
         window.onload = () => {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('activityDate').value = now.toISOString().slice(0,16);
+            loadPreferences();
+            loadHistory();
+            
+            // Set date to now if empty
+            if (!document.getElementById('activityDate').value) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('activityDate').value = now.toISOString().slice(0,16);
+            }
         };
 
         // UI Interactions
@@ -339,59 +328,89 @@
             }
         }
 
+        function savePreferences() {
+            const prefs = {
+                age: document.getElementById('age').value,
+                ftp: document.getElementById('ftp').value,
+                z1: document.getElementById('z1').value,
+                z2: document.getElementById('z2').value,
+                z3: document.getElementById('z3').value,
+                z4: document.getElementById('z4').value,
+                z5: document.getElementById('z5').value
+            };
+            localStorage.setItem('garminPrefs', JSON.stringify(prefs));
+        }
+
+        function loadPreferences() {
+            const prefsStr = localStorage.getItem('garminPrefs');
+            if (prefsStr) {
+                try {
+                    const prefs = JSON.parse(prefsStr);
+                    if(prefs.age) document.getElementById('age').value = prefs.age;
+                    if(prefs.ftp) document.getElementById('ftp').value = prefs.ftp;
+                    if(prefs.z1) document.getElementById('z1').value = prefs.z1;
+                    if(prefs.z2) document.getElementById('z2').value = prefs.z2;
+                    if(prefs.z3) document.getElementById('z3').value = prefs.z3;
+                    if(prefs.z4) document.getElementById('z4').value = prefs.z4;
+                    if(prefs.z5) {
+                        document.getElementById('z5').value = prefs.z5;
+                        document.getElementById('z6-label').innerText = `> ${prefs.z5} W`;
+                    }
+                } catch(e) { console.error(e); }
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem('garminHistory', JSON.stringify(activityHistory));
+        }
+
+        function loadHistory() {
+            const historyStr = localStorage.getItem('garminHistory');
+            if (historyStr) {
+                try {
+                    const parsed = JSON.parse(historyStr);
+                    activityHistory = parsed.map(act => {
+                        act.date = new Date(act.date);
+                        if (act.recoveredBy) act.recoveredBy = new Date(act.recoveredBy);
+                        return act;
+                    });
+                    if (activityHistory.length > 0) {
+                        recalculateTimeline();
+                        renderHistory();
+                    }
+                } catch(e) {
+                    console.error("Erreur de chargement", e);
+                    activityHistory = [];
+                }
+            }
+        }
+
         function updateZonesFromFTP() {
             const ftp = parseInt(document.getElementById('ftp').value) || 200;
-            document.getElementById('z1').value = Math.round(ftp * 0.55); // Active Recovery
-            document.getElementById('z2').value = Math.round(ftp * 0.75); // Endurance
-            document.getElementById('z3').value = Math.round(ftp * 0.90); // Tempo
-            document.getElementById('z4').value = Math.round(ftp * 1.05); // Threshold
-            document.getElementById('z5').value = Math.round(ftp * 1.20); // VO2 Max
+            document.getElementById('z1').value = Math.round(ftp * 0.55);
+            document.getElementById('z2').value = Math.round(ftp * 0.75);
+            document.getElementById('z3').value = Math.round(ftp * 0.90);
+            document.getElementById('z4').value = Math.round(ftp * 1.05);
+            document.getElementById('z5').value = Math.round(ftp * 1.20);
             document.getElementById('z6-label').innerText = `> ${Math.round(ftp * 1.20)} W`;
         }
 
-        function setRingProgress(percent, colorClass) {
-            const circle = document.getElementById('recovery-ring');
-            const radius = circle.r.baseVal.value;
-            const circumference = radius * 2 * Math.PI;
-            
-            // Remove previous color classes
-            circle.classList.remove('text-garmin-accent', 'text-garmin-alert', 'text-garmin-danger');
-            circle.classList.add(colorClass);
-
-            const offset = circumference - (percent / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
-        }
-
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        // Calculation Algorithm
         function calculateAndSave() {
-            // Fetch Inputs
             const dateStr = document.getElementById('activityDate').value;
             const activityDate = new Date(dateStr);
             const distance = parseFloat(document.getElementById('distance').value) || 0;
             const elevation = parseInt(document.getElementById('elevation').value) || 0;
+            const errorMsg = document.getElementById('error-msg');
 
             if (!dateStr || isNaN(activityDate.getTime())) {
-                alert("Veuillez entrer une date valide.");
+                errorMsg.innerText = "Veuillez entrer une date valide.";
+                errorMsg.classList.remove('hidden');
                 return;
             }
 
             const baseData = calculateBaseRecovery();
-            if (!baseData) return; // Validation failed
+            if (!baseData) return;
 
-            // Create activity object
             const activity = {
                 id: Date.now().toString(),
                 date: activityDate,
@@ -401,14 +420,20 @@
                 stats: baseData
             };
 
-            // Add to history and recalculate timeline
             activityHistory.push(activity);
             recalculateTimeline();
             renderHistory();
+            saveHistory(); // Sauvegarde dans le téléphone
+            
+            // Scroll to results smoothly on mobile
+            if (window.innerWidth < 1024) {
+                setTimeout(() => {
+                    document.getElementById('result-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            }
         }
 
         function calculateBaseRecovery() {
-            // 1. Fetch Inputs
             const hours = parseInt(document.getElementById('hours').value) || 0;
             const minutes = parseInt(document.getElementById('minutes').value) || 0;
             const hrAvg = parseInt(document.getElementById('hrAvg').value);
@@ -417,7 +442,6 @@
             const inputTSS = parseFloat(document.getElementById('inputTSS').value) || 0;
             const inputIF = parseFloat(document.getElementById('inputIF').value) || 0;
             const inputVI = parseFloat(document.getElementById('inputVI').value) || 0;
-            
             const np = parseInt(document.getElementById('normalizedPower').value) || 0;
             const ftp = parseInt(document.getElementById('ftp').value) || 200;
             const sleep = parseInt(document.getElementById('sleep').value);
@@ -426,139 +450,87 @@
 
             const errorMsg = document.getElementById('error-msg');
             
-            // Basic Validation
             if ((hours === 0 && minutes === 0) || !hrAvg || !hrMax || hrAvg >= hrMax) {
+                errorMsg.innerText = "Veuillez remplir correctement la durée et la fréquence cardiaque.";
                 errorMsg.classList.remove('hidden');
-                return;
+                return null;
             }
             errorMsg.classList.add('hidden');
 
             const durationHrs = hours + (minutes / 60);
-            const durationSecs = durationHrs * 3600;
+            let rawRecovery = 0, cardioDesc = "", powerDesc = "", stressScoreDesc = "", tss = 0, trainingEffect = "";
 
-            let rawRecovery = 0;
-            let cardioDesc = "Léger (Z1/Z2)";
-            let powerDesc = "Non renseignée";
-            let stressScoreDesc = "";
-            let tss = 0;
-            let trainingEffect = "Endurance de Base (Aérobie)"; // Nouveau : Badge d'effet d'entraînement
-
-            // 1st Priority: User provided TSS & IF directly
             if (inputTSS > 0) {
                 tss = inputTSS;
-                stressScoreDesc = `${tss} TSS (Wahoo ELEMNT)`;
-                cardioDesc = `Calcul basé sur la Charge Exacte`;
+                stressScoreDesc = `${tss} TSS`;
+                cardioDesc = `Basé sur TSS exact`;
 
-                // Calculate recovery smoothly based on TSS
-                if (tss < 100) {
-                    rawRecovery = (tss / 100) * 18; // Max 18h for <100 TSS
-                } else if (tss < 200) {
-                    rawRecovery = 18 + ((tss - 100) / 100) * 18; // 18-36h
-                } else if (tss < 300) {
-                    rawRecovery = 36 + ((tss - 200) / 100) * 24; // 36-60h
-                } else {
-                    rawRecovery = 60 + ((tss - 300) / 100) * 36; // 60-96h+
-                }
+                if (tss < 100) rawRecovery = (tss / 100) * 18;
+                else if (tss < 200) rawRecovery = 18 + ((tss - 100) / 100) * 18;
+                else if (tss < 300) rawRecovery = 36 + ((tss - 200) / 100) * 24;
+                else rawRecovery = 60 + ((tss - 300) / 100) * 36;
 
-                // Analyze IF
                 let actualIF = inputIF > 0 ? inputIF : (np > 0 ? np/ftp : 0);
                 if (actualIF > 0) {
-                    if (actualIF < 0.75) { powerDesc = `Endurance / Récupération (IF: ${actualIF.toFixed(2)})`; trainingEffect = actualIF < 0.65 ? "Récupération Active" : "Endurance de Base (Aérobie)"; }
-                    else if (actualIF < 0.85) { powerDesc = `Tempo / Rythme (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Tempo (Rythme soutenu)"; }
-                    else if (actualIF < 0.95) { powerDesc = `Sweet Spot / Seuil (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Amélioration du Seuil Lactique"; }
-                    else if (actualIF < 1.05) { powerDesc = `Intense / Seuil Max (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Développement VO2 Max / PMA"; }
-                    else { powerDesc = `Très intense / Anaérobie (IF: ${actualIF.toFixed(2)})`; trainingEffect = "Capacité Anaérobie (Sprints/Lactique)"; }
+                    if (actualIF < 0.75) { trainingEffect = actualIF < 0.65 ? "Récupération Active" : "Endurance de Base"; }
+                    else if (actualIF < 0.85) { trainingEffect = "Tempo / Rythme soutenu"; }
+                    else if (actualIF < 0.95) { trainingEffect = "Amélioration du Seuil"; }
+                    else if (actualIF < 1.05) { trainingEffect = "Développement VO2 Max"; }
+                    else { trainingEffect = "Capacité Anaérobie"; }
                 } else {
-                    powerDesc = `Basé sur le TSS fourni`;
+                    trainingEffect = "Charge cumulée";
                 }
-
-                // Analyze VI for muscle fatigue
-                if (inputVI >= 1.20) {
-                    powerDesc += ` • Effort très saccadé (VI: ${inputVI}), usure musculaire élevée !`;
-                } else if (inputVI >= 1.10) {
-                    powerDesc += ` • Effort vallonné/relances (VI: ${inputVI})`;
-                } else if (inputVI > 0) {
-                    powerDesc += ` • Effort régulier (VI: ${inputVI})`;
-                }
-
+                
+                powerDesc = inputVI >= 1.10 ? `(VI: ${inputVI} - Usant)` : `(VI: ${inputVI})`;
             } 
-            // 2nd Priority: Calculated TSS via NP & FTP
             else if (np > 0 && ftp > 0) {
                 const intensityFactor = np / ftp;
-                tss = Math.round(((durationSecs * np * intensityFactor) / (ftp * 3600)) * 100);
-                
-                stressScoreDesc = `${tss} TSS (Calculé)`;
+                tss = Math.round(((durationHrs * 3600 * np * intensityFactor) / (ftp * 3600)) * 100);
+                stressScoreDesc = `${tss} TSS (Calculé NP)`;
 
-                if (tss < 100) { rawRecovery = 12; cardioDesc = "Récupération / Faible"; } 
-                else if (tss < 200) { rawRecovery = 24; cardioDesc = "Modéré"; } 
-                else if (tss < 300) { rawRecovery = 36; cardioDesc = "Élevé"; } 
-                else if (tss < 400) { rawRecovery = 48; cardioDesc = "Très Élevé"; } 
-                else { rawRecovery = 72; cardioDesc = "Extrême"; }
+                if (tss < 100) rawRecovery = 12; else if (tss < 200) rawRecovery = 24; else if (tss < 300) rawRecovery = 36; else if (tss < 400) rawRecovery = 48; else rawRecovery = 72;
 
-                const z1 = parseInt(document.getElementById('z1').value) || 110;
-                const z2 = parseInt(document.getElementById('z2').value) || 150;
-                const z3 = parseInt(document.getElementById('z3').value) || 180;
-                const z4 = parseInt(document.getElementById('z4').value) || 210;
-                const z5 = parseInt(document.getElementById('z5').value) || 240;
-
-                if (np <= z1) { powerDesc = `Z1 (Récupération) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Récupération Active"; }
-                else if (np <= z2) { powerDesc = `Z2 (Endurance) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Endurance de Base (Aérobie)"; }
-                else if (np <= z3) { powerDesc = `Z3 (Tempo) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Tempo (Rythme soutenu)"; }
-                else if (np <= z4) { powerDesc = `Z4 (Seuil) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Amélioration du Seuil Lactique"; }
-                else if (np <= z5) { powerDesc = `Z5 (VO2 Max) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Développement VO2 Max / PMA"; }
-                else { powerDesc = `Z6 (Anaérobie/Sprint) - IF: ${intensityFactor.toFixed(2)}`; trainingEffect = "Capacité Anaérobie (Sprints/Lactique)"; }
+                if (intensityFactor < 0.75) trainingEffect = "Endurance de Base";
+                else if (intensityFactor < 0.85) trainingEffect = "Tempo";
+                else if (intensityFactor < 0.95) trainingEffect = "Seuil Lactique";
+                else if (intensityFactor < 1.05) trainingEffect = "VO2 Max";
+                else trainingEffect = "Anaérobie";
             } 
-            // Fallback: Heart Rate intensity calculation
             else {
                 const intensityRatio = hrAvg / hrMax;
                 let hrMultiplier = 5;
-                
-                if (intensityRatio >= 0.9) { hrMultiplier = 25; cardioDesc = "Extrême (VO2 Max/Max)"; trainingEffect = "Développement VO2 Max / PMA"; }
-                else if (intensityRatio >= 0.85) { hrMultiplier = 20; cardioDesc = "Très Élevé (Seuil/Z4)"; trainingEffect = "Amélioration du Seuil Lactique"; }
-                else if (intensityRatio >= 0.75) { hrMultiplier = 14; cardioDesc = "Élevé (Tempo/Z3)"; trainingEffect = "Tempo (Rythme soutenu)"; }
-                else if (intensityRatio >= 0.65) { hrMultiplier = 8; cardioDesc = "Modéré (Endurance/Z2)"; trainingEffect = "Endurance de Base (Aérobie)"; }
-                else { trainingEffect = "Récupération Active"; }
+                if (intensityRatio >= 0.9) { hrMultiplier = 25; trainingEffect = "VO2 Max / PMA"; }
+                else if (intensityRatio >= 0.85) { hrMultiplier = 20; trainingEffect = "Seuil Lactique"; }
+                else if (intensityRatio >= 0.75) { hrMultiplier = 14; trainingEffect = "Tempo"; }
+                else if (intensityRatio >= 0.65) { hrMultiplier = 8; trainingEffect = "Endurance"; }
+                else { trainingEffect = "Récupération"; }
                 
                 rawRecovery = durationHrs * hrMultiplier;
                 tss = Math.round(rawRecovery * 5); 
-                stressScoreDesc = `~${tss} (Estimé d'après FC)`;
+                stressScoreDesc = `~${tss} (Estimé FC)`;
+                cardioDesc = `Ratio FC: ${(intensityRatio*100).toFixed(0)}%`;
             }
 
-            // 3.5 Age and Temperature Modifiers
-            let ageModifier = 1.0;
-            let ageDesc = "Standard (20-30 ans)";
-            if (age > 30) {
-                const penalty = (age - 30) * 0.01; // +1% par année au-dessus de 30 ans
-                ageModifier = 1.0 + penalty;
-                ageDesc = `+${Math.round(penalty * 100)}% (Métabolisme)`;
-            } else if (age < 20) {
-                ageModifier = 0.95;
-                ageDesc = "-5% (Récupération rapide)";
-            }
+            let ageModifier = 1.0, ageDesc = "Standard";
+            if (age > 30) { ageModifier = 1.0 + ((age - 30) * 0.01); ageDesc = `+${Math.round((ageModifier-1)*100)}% (Âge)`; } 
+            else if (age < 20) { ageModifier = 0.95; ageDesc = "-5%"; }
 
-            let tempModifier = 1.0;
-            let tempDesc = "Neutre (10-24°C)";
-            if (temperature >= 35) { tempModifier = 1.25; tempDesc = "Extrême (+25% de charge)"; }
-            else if (temperature >= 30) { tempModifier = 1.15; tempDesc = "Très chaud (+15%)"; }
-            else if (temperature >= 25) { tempModifier = 1.05; tempDesc = "Chaud (+5%)"; }
-            else if (temperature <= 5) { tempModifier = 1.05; tempDesc = "Froid (+5% d'énergie)"; }
+            let tempModifier = 1.0, tempDesc = "Neutre";
+            if (temperature >= 35) { tempModifier = 1.25; tempDesc = "Canicule (+25%)"; }
+            else if (temperature >= 30) { tempModifier = 1.15; tempDesc = "Chaud (+15%)"; }
+            else if (temperature >= 25) { tempModifier = 1.05; tempDesc = "Tiède (+5%)"; }
+            else if (temperature <= 5) { tempModifier = 1.05; tempDesc = "Froid (+5%)"; }
 
-            // Apply environmental and biological modifiers to the base recovery before sleep modifier
             rawRecovery = rawRecovery * ageModifier * tempModifier;
 
-            // 4. Sleep Modifier
-            let sleepModifier = 1.0;
-            let sleepDesc = "Neutre";
-            if (sleep === 5) { sleepModifier = 0.75; sleepDesc = "Excellent (-25% temps)"; }
-            else if (sleep === 4) { sleepModifier = 0.90; sleepDesc = "Bon (-10% temps)"; }
-            else if (sleep === 3) { sleepModifier = 1.0; sleepDesc = "Moyen (Aucun impact)"; }
-            else if (sleep === 2) { sleepModifier = 1.20; sleepDesc = "Mauvais (+20% temps)"; }
-            else if (sleep === 1) { sleepModifier = 1.40; sleepDesc = "Très Mauvais (+40% temps)"; }
-
-            let finalRecovery = Math.round(rawRecovery * sleepModifier);
+            let sleepModifier = 1.0, sleepDesc = "Moyen";
+            if (sleep === 5) { sleepModifier = 0.75; sleepDesc = "Top (-25%)"; }
+            else if (sleep === 4) { sleepModifier = 0.90; sleepDesc = "Bon (-10%)"; }
+            else if (sleep === 2) { sleepModifier = 1.20; sleepDesc = "Mauvais (+20%)"; }
+            else if (sleep === 1) { sleepModifier = 1.40; sleepDesc = "Ko (+40%)"; }
 
             return {
-                rawRecovery: finalRecovery,
+                rawRecovery: Math.round(rawRecovery * sleepModifier),
                 cardioDesc: cardioDesc,
                 powerDesc: powerDesc,
                 sleepDesc: sleepDesc,
@@ -566,59 +538,37 @@
                 tss: tss,
                 ageDesc: ageDesc,
                 tempDesc: tempDesc,
-                trainingEffect: trainingEffect // Ajouté à l'objet retourné
+                trainingEffect: trainingEffect
             };
         }
 
         function recalculateTimeline() {
-            // Sort history chronologically
             activityHistory.sort((a, b) => a.date - b.date);
-
-            let fullyRecoveredDate = null;
-            let latestActivity = null;
+            let fullyRecoveredDate = null, latestActivity = null;
 
             activityHistory.forEach(act => {
                 let rawResidualHours = 0;
-                
-                // If we have previous fatigue and we haven't fully recovered by this activity's start date
                 if (fullyRecoveredDate && fullyRecoveredDate > act.date) {
                     rawResidualHours = (fullyRecoveredDate - act.date) / (1000 * 60 * 60);
                 }
 
-                let multiplier = 1.0;
-                let coeffReason = "";
-
+                let multiplier = 1.0, coeffReason = "";
                 if (rawResidualHours > 0) {
-                    // Si la nouvelle séance est une récupération active (très faible charge)
-                    if (act.baseRecovery <= 12) {
-                        multiplier = 0.7; // Absorbe 30% de la fatigue résiduelle (décrassage)
-                        coeffReason = "(Récupération active : -30% sur la dette)";
-                    } 
-                    // Si la nouvelle séance est très intense (grosse charge sur organisme fatigué)
-                    else if (act.baseRecovery > 36) {
-                        multiplier = 1.3; // Pénalité de 30% (effet boule de neige)
-                        coeffReason = "(Effort extrême sur fatigue : +30% de pénalité)";
-                    } 
-                    // Si la séance est soutenue (intensité moyenne-haute)
-                    else if (act.baseRecovery > 24) {
-                        multiplier = 1.1; // Pénalité de 10%
-                        coeffReason = "(Effort soutenu sur fatigue : +10%)";
-                    }
+                    if (act.baseRecovery <= 12) { multiplier = 0.7; coeffReason = "(Décrassage: -30% dette)"; } 
+                    else if (act.baseRecovery > 36) { multiplier = 1.3; coeffReason = "(Gros effort: +30% pénalité)"; } 
+                    else if (act.baseRecovery > 24) { multiplier = 1.1; coeffReason = "(Effort soutenu: +10%)"; }
                 }
 
                 act.residualFatigue = Math.round(rawResidualHours * multiplier);
                 act.totalRecoveryApplied = act.baseRecovery + act.residualFatigue;
                 act.coeffReason = coeffReason;
                 
-                // Calculate when the athlete will be 100% recovered from THIS point
                 fullyRecoveredDate = new Date(act.date.getTime() + (act.totalRecoveryApplied * 60 * 60 * 1000));
                 act.recoveredBy = fullyRecoveredDate;
                 latestActivity = act;
             });
 
-            if (latestActivity) {
-                updateDashboard(latestActivity);
-            }
+            if (latestActivity) updateDashboard(latestActivity);
         }
 
         function renderHistory() {
@@ -627,78 +577,107 @@
             
             if (activityHistory.length === 0) {
                 panel.classList.add('hidden');
+                document.getElementById('result-container').classList.remove('show');
                 return;
             }
 
-            // Calcul du Statut d'Entraînement Global (Surcharge / Productif / Maintien)
-            // On prend la date de l'activité la plus récente, et on somme les TSS des 7 jours précédents.
-            activityHistory.sort((a, b) => a.date - b.date); // S'assurer que c'est trié
             const latestAct = activityHistory[activityHistory.length - 1];
             const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
-            
             let weeklyTSS = 0;
+            
             activityHistory.forEach(act => {
-                if (latestAct.date.getTime() - act.date.getTime() <= oneWeekMs) {
-                    weeklyTSS += act.stats.tss;
-                }
+                if (latestAct.date.getTime() - act.date.getTime() <= oneWeekMs) weeklyTSS += act.stats.tss;
             });
 
-            // Affichage du statut global
-            let statusTitle = "";
-            let statusColor = "";
-            let statusDesc = "";
-
-            if (weeklyTSS < 150) {
-                statusTitle = "Désentraînement / Repos"; statusColor = "text-slate-400"; statusDesc = "Charge très faible. Ton corps récupère ou perd en condition.";
-            } else if (weeklyTSS < 300) {
-                statusTitle = "Maintien"; statusColor = "text-sky-400"; statusDesc = "Charge suffisante pour maintenir ta condition physique actuelle.";
-            } else if (weeklyTSS < 600) {
-                statusTitle = "Productif"; statusColor = "text-garmin-accent"; statusDesc = "Excellente zone ! Ton corps s'adapte et progresse efficacement.";
-            } else if (weeklyTSS < 800) {
-                statusTitle = "Surcharge Périodique"; statusColor = "text-garmin-alert"; statusDesc = "Gros volume d'entraînement. Assure-toi de bien dormir.";
-            } else {
-                statusTitle = "Surentraînement / Risque"; statusColor = "text-garmin-danger"; statusDesc = "Charge extrême (>800 TSS). Réduis l'intensité pour éviter la blessure.";
-            }
+            let statusTitle = "", statusColor = "", statusDesc = "";
+            if (weeklyTSS < 150) { statusTitle = "Repos"; statusColor = "text-slate-400"; statusDesc = "Charge très faible."; } 
+            else if (weeklyTSS < 300) { statusTitle = "Maintien"; statusColor = "text-sky-400"; statusDesc = "Maintien de la condition."; } 
+            else if (weeklyTSS < 600) { statusTitle = "Productif"; statusColor = "text-garmin-accent"; statusDesc = "Excellente progression."; } 
+            else if (weeklyTSS < 800) { statusTitle = "Surcharge"; statusColor = "text-garmin-alert"; statusDesc = "Attention au repos."; } 
+            else { statusTitle = "Risque"; statusColor = "text-garmin-danger"; statusDesc = "Surentraînement possible."; }
 
             document.getElementById('global-status-title').innerText = statusTitle;
-            document.getElementById('global-status-title').className = `text-lg font-bold ${statusColor}`;
+            document.getElementById('global-status-title').className = `text-lg sm:text-xl font-bold ${statusColor}`;
             document.getElementById('global-status-desc').innerText = `Charge 7j : ~${weeklyTSS} TSS. ${statusDesc}`;
 
             panel.classList.remove('hidden');
             list.innerHTML = '';
 
-            // Render in reverse chronological order (newest first)
             [...activityHistory].reverse().forEach(act => {
                 const dateStr = act.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-                
-                let contextStr = "";
-                if (act.distance > 0 || act.elevation > 0) {
-                    const dist = act.distance > 0 ? `${act.distance} km` : '';
-                    const elev = act.elevation > 0 ? `${act.elevation}m D+` : '';
-                    contextStr = `<div class="text-xs text-slate-300 font-medium mb-1 mt-1">${dist} ${dist && elev ? '•' : ''} ${elev}</div>`;
-                }
+                const dist = act.distance > 0 ? `${act.distance} km` : '';
+                const elev = act.elevation > 0 ? `${act.elevation}m D+` : '';
+                const contextStr = (dist || elev) ? `<div class="text-xs text-slate-300 font-medium mb-1 mt-1">${dist} ${dist && elev ? '•' : ''} ${elev}</div>` : '';
 
                 list.innerHTML += `
-                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 flex justify-between items-center">
+                    <div class="bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-700 flex justify-between items-center">
                         <div>
                             <div class="text-sm font-semibold text-white">${dateStr}</div>
                             ${contextStr}
-                            <div class="text-[11px] text-slate-400 mb-0.5">${act.stats.stressScoreDesc} • <span class="text-sky-300">${act.stats.trainingEffect}</span></div>
+                            <div class="text-[10px] sm:text-xs text-slate-400 mb-0.5">${act.stats.stressScoreDesc} • <span class="text-sky-300">${act.stats.trainingEffect}</span></div>
                             ${act.coeffReason ? `<div class="text-[10px] text-garmin-accent italic">${act.coeffReason}</div>` : ''}
                         </div>
                         <div class="text-right">
-                            <div class="text-lg font-bold text-garmin-accent">${act.totalRecoveryApplied}h</div>
-                            ${act.residualFatigue > 0 ? `<div class="text-xs text-garmin-alert">+${act.residualFatigue}h résiduel</div>` : ''}
+                            <div class="text-lg sm:text-xl font-bold text-garmin-accent">${act.totalRecoveryApplied}h</div>
+                            ${act.residualFatigue > 0 ? `<div class="text-[10px] sm:text-xs text-garmin-alert">+${act.residualFatigue}h résiduel</div>` : ''}
                         </div>
                     </div>
                 `;
             });
         }
 
+        let confirmClearTimer = null;
         function clearHistory() {
+            const btn = document.getElementById('clear-btn');
+            
+            if (btn.innerText === "Vider le cache") {
+                // Étape 1 : Demande de confirmation visuelle
+                btn.innerText = "Confirmer ?";
+                btn.classList.replace('text-garmin-danger', 'text-white');
+                btn.classList.remove('underline', 'hover:text-red-400');
+                btn.classList.add('bg-red-600', 'rounded', 'px-3');
+                
+                // Annule la confirmation après 3 secondes si on ne clique pas
+                confirmClearTimer = setTimeout(() => {
+                    btn.innerText = "Vider le cache";
+                    btn.classList.replace('text-white', 'text-garmin-danger');
+                    btn.classList.remove('bg-red-600', 'rounded', 'px-3');
+                    btn.classList.add('underline', 'hover:text-red-400');
+                }, 3000);
+                return;
+            }
+
+            // Étape 2 : L'utilisateur a cliqué sur "Confirmer ?"
+            clearTimeout(confirmClearTimer);
             activityHistory = [];
             renderHistory();
-            document.getElementById('result-container').classList.remove('show');
+            saveHistory(); // Efface du cache
+            
+            // Restaure le bouton dans son état initial
+            btn.innerText = "Vider le cache";
+            btn.classList.replace('text-white', 'text-garmin-danger');
+            btn.classList.remove('bg-red-600', 'rounded', 'px-3');
+            btn.classList.add('underline', 'hover:text-red-400');
+        }
+
+        function setRingProgress(percent, colorClass) {
+            const circle = document.getElementById('recovery-ring');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            circle.classList.remove('text-garmin-accent', 'text-garmin-alert', 'text-garmin-danger');
+            circle.classList.add(colorClass);
+            circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+        }
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
         }
 
         function updateDashboard(activityData) {
@@ -708,69 +687,38 @@
             const stats = activityData.stats;
             const hours = activityData.totalRecoveryApplied;
 
-            // Set Details
             document.getElementById('detail-tss').innerText = stats.stressScoreDesc;
             document.getElementById('detail-cardio').innerText = stats.cardioDesc;
-            document.getElementById('detail-power').innerText = stats.powerDesc;
+            document.getElementById('detail-effect').innerText = stats.trainingEffect;
+            document.getElementById('detail-physio').innerText = `Âge: ${stats.ageDesc} | Météo: ${stats.tempDesc}`;
             document.getElementById('detail-sleep').innerText = stats.sleepDesc;
-            document.getElementById('detail-age').innerText = stats.ageDesc;
-            document.getElementById('detail-temp').innerText = stats.tempDesc;
-            document.getElementById('detail-effect').innerText = stats.trainingEffect; // Mise à jour de l'effet
             
             const residualEl = document.getElementById('detail-residual');
             if (activityData.residualFatigue > 0) {
                 residualEl.innerText = `+${activityData.residualFatigue}h ${activityData.coeffReason}`;
-                residualEl.classList.remove('text-slate-500');
-                residualEl.classList.add('text-garmin-alert');
+                residualEl.className = 'font-semibold text-garmin-alert text-right text-xs sm:text-sm';
             } else {
                 residualEl.innerText = "0h (Frais)";
-                residualEl.classList.remove('text-garmin-alert');
-                residualEl.classList.add('text-slate-500');
+                residualEl.className = 'font-semibold text-slate-500 text-right';
             }
 
-            // Animate Number
-            const numberElement = document.getElementById('result-hours');
-            animateValue(numberElement, 0, hours, 1000);
+            animateValue(document.getElementById('result-hours'), 0, hours, 1000);
 
-            // Ring logic & Colors
-            // Scale: 0-24h (Green), 24-48h (Orange), 48h+ (Red)
-            let percentage = (hours / 96) * 100;
-            if (percentage > 100) percentage = 100;
-
-            let colorClass = 'text-garmin-accent';
-            let statusText = 'Récupéré demain';
-            let bgStatus = 'bg-emerald-900/40 text-emerald-400';
-            let advice = "Tu peux prévoir une nouvelle séance d'entraînement normale dès demain. Ton corps a bien assimilé la charge.";
+            let percentage = Math.min((hours / 96) * 100, 100);
+            let colorClass = 'text-garmin-accent', statusText = 'Récupéré demain', bgStatus = 'bg-emerald-900/40 text-emerald-400', advice = "Tu peux prévoir une nouvelle séance d'entraînement normale dès demain.";
 
             if (hours > 48) {
-                colorClass = 'text-garmin-danger';
-                statusText = 'Repos Profond Nécessaire';
-                bgStatus = 'bg-red-900/40 text-red-400';
-                advice = "Charge très élevée. Prévois au moins 2 jours de repos complet ou de récupération très active (Zone 1) avant la prochaine séance intense.";
+                colorClass = 'text-garmin-danger'; statusText = 'Repos Profond'; bgStatus = 'bg-red-900/40 text-red-400'; advice = "Charge très élevée. Prévois au moins 2 jours de repos ou de récupération (Z1).";
             } else if (hours > 24) {
-                colorClass = 'text-garmin-alert';
-                statusText = 'Fatigue Accumulée';
-                bgStatus = 'bg-amber-900/40 text-amber-400';
-                advice = "Demain, privilégie une sortie en endurance fondamentale (Zone 2) ou prends un jour de repos. Laisse ton système nerveux récupérer.";
+                colorClass = 'text-garmin-alert'; statusText = 'Fatigue Accumulée'; bgStatus = 'bg-amber-900/40 text-amber-400'; advice = "Privilégie une sortie en endurance (Zone 2) ou prends un jour de repos.";
             }
 
             const badge = document.getElementById('result-status');
-            badge.className = `px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase mb-8 ${bgStatus}`;
+            badge.className = `px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold tracking-wide uppercase mb-6 text-center ${bgStatus}`;
             badge.innerText = statusText;
-
             document.getElementById('recommendation-text').innerText = advice;
 
-            // Trigger Ring Animation after a slight delay
-            setTimeout(() => {
-                setRingProgress(percentage, colorClass);
-            }, 100);
-            
-            // Scroll to results on mobile
-            if (window.innerWidth < 1024) {
-                setTimeout(() => {
-                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            }
+            setTimeout(() => setRingProgress(percentage, colorClass), 100);
         }
     </script>
 </body>
