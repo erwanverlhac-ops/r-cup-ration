@@ -168,7 +168,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-400 mb-2">Âge</label>
                         <div class="relative">
@@ -181,6 +181,13 @@
                         <div class="relative">
                             <input type="number" id="temperature" value="20" min="-10" max="50" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
                             <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">°C</span>
+                        </div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Cadence Moy.</label>
+                        <div class="relative">
+                            <input type="number" id="cadence" placeholder="Ex: 85" min="40" max="150" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-3 px-4 text-base sm:text-sm text-white focus:outline-none focus:border-garmin-accent focus:ring-1 focus:ring-garmin-accent">
+                            <span class="absolute right-3 sm:right-4 top-3 text-slate-400 text-sm">rpm</span>
                         </div>
                     </div>
                 </div>
@@ -447,6 +454,7 @@
             const sleep = parseInt(document.getElementById('sleep').value);
             const age = parseInt(document.getElementById('age').value) || 30;
             const temperature = parseInt(document.getElementById('temperature').value) || 20;
+            const cadence = parseInt(document.getElementById('cadence').value) || 0;
 
             const errorMsg = document.getElementById('error-msg');
             
@@ -521,7 +529,15 @@
             else if (temperature >= 25) { tempModifier = 1.05; tempDesc = "Tiède (+5%)"; }
             else if (temperature <= 5) { tempModifier = 1.05; tempDesc = "Froid (+5%)"; }
 
-            rawRecovery = rawRecovery * ageModifier * tempModifier;
+            let cadenceModifier = 1.0, cadenceDesc = "";
+            if (cadence > 0) {
+                if (cadence < 75) { cadenceModifier = 1.15; cadenceDesc = "En force (+15%)"; }
+                else if (cadence < 85) { cadenceModifier = 1.05; cadenceDesc = "Légèrement en force (+5%)"; }
+                else if (cadence > 100) { cadenceModifier = 0.95; cadenceDesc = "Véloce (-5%)"; }
+                else { cadenceDesc = "Fluide"; }
+            }
+
+            rawRecovery = rawRecovery * ageModifier * tempModifier * cadenceModifier;
 
             let sleepModifier = 1.0, sleepDesc = "Moyen";
             if (sleep === 5) { sleepModifier = 0.75; sleepDesc = "Top (-25%)"; }
@@ -538,6 +554,7 @@
                 tss: tss,
                 ageDesc: ageDesc,
                 tempDesc: tempDesc,
+                cadenceDesc: cadenceDesc,
                 trainingEffect: trainingEffect
             };
         }
@@ -690,7 +707,11 @@
             document.getElementById('detail-tss').innerText = stats.stressScoreDesc;
             document.getElementById('detail-cardio').innerText = stats.cardioDesc;
             document.getElementById('detail-effect').innerText = stats.trainingEffect;
-            document.getElementById('detail-physio').innerText = `Âge: ${stats.ageDesc} | Météo: ${stats.tempDesc}`;
+            
+            let physioText = `Âge: ${stats.ageDesc} | Météo: ${stats.tempDesc}`;
+            if (stats.cadenceDesc) physioText += ` | Cadence: ${stats.cadenceDesc}`;
+            document.getElementById('detail-physio').innerText = physioText;
+            
             document.getElementById('detail-sleep').innerText = stats.sleepDesc;
             
             const residualEl = document.getElementById('detail-residual');
